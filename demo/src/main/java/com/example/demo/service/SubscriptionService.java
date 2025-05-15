@@ -1,11 +1,14 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.SubsDTO;
 import com.example.demo.entity.Subscription;
 import com.example.demo.entity.User;
 import com.example.demo.repository.SubscriptionRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SubscriptionService {
@@ -27,7 +30,16 @@ public class SubscriptionService {
         return subscriptionRepository.findByUserId(userId);
     }
 
-    public void deleteSubscription(Long subscriptionId) {
-        subscriptionRepository.deleteById(subscriptionId);
+    public void deleteSubscription(Long userId, Long subscriptionId) {
+        Optional<Subscription> subscription = subscriptionRepository.findByIdAndUserId(subscriptionId, userId);
+        if (subscription.isPresent()) {
+            subscriptionRepository.delete(subscription.get());
+        } else {
+            throw new RuntimeException("Subscription not found");
+        }
+    }
+
+    public List<SubsDTO> getTopSubs() {
+        return subscriptionRepository.findTopSubs(PageRequest.of(0, 3));
     }
 }
